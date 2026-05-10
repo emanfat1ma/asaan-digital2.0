@@ -1,11 +1,11 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Use connectionString for production (Supabase/Neon), fallback to individual fields for local
+// Logic to determine config based on available environment variables
 const poolConfig = process.env.DATABASE_URL 
   ? { 
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false } // Required for most cloud DBs
+      ssl: { rejectUnauthorized: false } 
     }
   : {
       host: process.env.DB_HOST || 'localhost',
@@ -13,17 +13,18 @@ const poolConfig = process.env.DATABASE_URL
       database: process.env.DB_NAME || 'asaan_digital',
       user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD,
+      // Local development usually doesn't need SSL
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
     };
 
+// Initialize the pool with the correct configuration
 const pool = new Pool({
-  host: process.env.DB_HOST, 
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  ssl: { rejectUnauthorized: false }, // REQUIRED for cloud Postgres
-  max: 20
+  ...poolConfig,
+  max: parseInt(process.env.DB_MAX_CONNECTIONS) || 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 });
+
 // Test database connection
 pool.connect((err, client, release) => {
   if (err) {
@@ -33,7 +34,6 @@ pool.connect((err, client, release) => {
     release();
   }
 });
-
 
 // Query helper with automatic error handling
 const query = async (text, params) => {
