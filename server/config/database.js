@@ -16,12 +16,14 @@ const poolConfig = process.env.DATABASE_URL
     };
 
 const pool = new Pool({
-  ...poolConfig,
-  max: parseInt(process.env.DB_MAX_CONNECTIONS) || 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000, // Increased slightly for cloud latency
+  host: process.env.DB_HOST, 
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  ssl: { rejectUnauthorized: false }, // REQUIRED for cloud Postgres
+  max: 20
 });
-
 // Test database connection
 pool.connect((err, client, release) => {
   if (err) {
