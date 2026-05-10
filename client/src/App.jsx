@@ -12,7 +12,7 @@ import Admin from './pages/Admin';
 import TutorialDetail from './pages/TutorialDetail';
 import AdminAnalytics from './pages/AdminAnalytics';
 import AdminContent from './pages/AdminContent';
-import CategoryExplore from './pages/CategoryExplore';
+import CategoryExplore from './pages/CategoryExplore.jsx';
 import TutorialQuiz from './pages/TutorialQuiz';
 import VoiceSearch from './components/VoiceSearch';
 
