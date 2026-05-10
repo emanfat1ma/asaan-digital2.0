@@ -1,27 +1,37 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Create connection pool
+// Use connectionString for production (Supabase/Neon), fallback to individual fields for local
+const poolConfig = process.env.DATABASE_URL 
+  ? { 
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false } // Required for most cloud DBs
+    }
+  : {
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 5432,
+      database: process.env.DB_NAME || 'asaan_digital',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD,
+    };
+
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'asaan_digital',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD,
+  ...poolConfig,
   max: parseInt(process.env.DB_MAX_CONNECTIONS) || 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 5000, // Increased slightly for cloud latency
 });
 
 // Test database connection
 pool.connect((err, client, release) => {
   if (err) {
-    console.error('❌ Database connection error:', err.stack);
+    console.error('❌ Database connection error:', err.message);
   } else {
     console.log('✅ Database connected successfully');
     release();
   }
 });
+
 
 // Query helper with automatic error handling
 const query = async (text, params) => {
