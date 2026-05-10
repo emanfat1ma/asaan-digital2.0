@@ -33,11 +33,10 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-  optionsSuccessStatus: 200
+  origin: process.env.CLIENT_URL || "https://asaan-digital2-0-client.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
-
 app.use('/api/videos', videoRoutes);
 
 // Rate limiting
